@@ -53,5 +53,5 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     console.log(`Uploaded video: ${originalname} (filename: ${filename}, path: ${path})`)
 
-    res.json({ message: "Video uploaded successfully!" })
+    res.status(200).json({ message: "Video uploaded successfully!" })
 }
