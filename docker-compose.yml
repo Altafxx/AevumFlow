@@ -9,7 +9,7 @@ services:
       - ./data/json:/etc/nginx/json
       - ./data/vod:/etc/nginx/vod
     ports:
-      - "5678:80"
+      - "9888:80"
     restart: unless-stopped
   app:
     build: 
