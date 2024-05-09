@@ -20,7 +20,7 @@ services:
     ports:
       - 9889:9889
     volumes: 
-      - ./data/json:/app/json
-      - ./data/vod:/app/vod
-      - ./data/uploads:/app/uploads 
+      - ./data/json:/app/data/json
+      - ./data/vod:/app/data/vod
+      - ./data/uploads:/app/data/uploads 
       - ./src:/app/src
