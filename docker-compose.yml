@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  video:
+    build: 
+      dockerfile: docker/video.Dockerfile
+    volumes:
+      - ./data/json:/etc/nginx/json
+      - ./data/vod:/etc/nginx/vod
+    ports:
+      - "5678:80"
+    restart: unless-stopped
+  app:
+    build: 
+      context: .
+      dockerfile: docker/app.Dockerfile
+    # command: ts-node src/index.ts
+    command: ts-node src/index.ts
+    ports:
+      - 9889:9889
+    volumes: 
+      - ./data/json:/app/json
+      - ./data/vod:/app/vod
+      - ./data/uploads:/app/uploads 
+      - ./src:/app/src

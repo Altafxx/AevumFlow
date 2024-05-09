@@ -1,0 +1,6 @@
+node_modules
+output_*
+data/uploads/*
+data/vod/*
+data/json/*
+src/data.db
