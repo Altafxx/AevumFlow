@@ -37,12 +37,13 @@ export const uploadVideo = async (req: Request, res: Response) => {
     }
 
     const uploadPath = __dirname + "/../.." + "/data/json/"
+    const vidJson = filename.replace('.mp4', '.json')
 
     try {
-        await insertVideoData(title, description, filename, `/video/${path}/master.m3u8`);
+        await insertVideoData(title, description, filename, `/video/${vidJson}/master.m3u8`);
         // await ffmpegQueue.add({ filename })
 
-        await writeFile(uploadPath + filename + ".json", JSON.stringify(jsonData, null, 2));
+        await writeFile(uploadPath + vidJson, JSON.stringify(jsonData, null, 2));
         console.log(`JSON file created:`);
 
     } catch (error) {
