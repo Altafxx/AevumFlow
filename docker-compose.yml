@@ -3,6 +3,7 @@ version: "3.8"
 services:
   video:
     build: 
+      context: .
       dockerfile: docker/video.Dockerfile
     volumes:
       - ./data/json:/etc/nginx/json
