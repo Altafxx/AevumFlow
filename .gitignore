@@ -4,3 +4,4 @@ data/uploads/*
 data/vod/*
 data/json/*
 src/data.db
+data/*.mp4

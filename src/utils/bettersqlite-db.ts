@@ -6,13 +6,17 @@ let db: typeDB
 
 db = new Database(dbPath, { verbose: console.log })
 
-async function insertVideoData(title: string, description: string, filename: string) {
+async function insertVideoData(title: string, description: string, filename: string, path: string) {
+    console.log(title)
+    console.log(description)
+    console.log(filename)
+    console.log(path)
     const insertQuery = `
-    INSERT INTO videos (title, description, filename)
-    VALUES (?, ?, ?)
+    INSERT INTO videos (title, description, filename, path)
+    VALUES (?, ?, ?, ?)
   `;
 
-    const dataToInsert = [title, description, filename];
+    const dataToInsert = [title, description, filename, path];
 
     try {
         await db.prepare(insertQuery).run(dataToInsert);
@@ -31,6 +35,7 @@ async function createTableIfNotExists() {
       title TEXT,
       description TEXT,
       filename TEXT,
+      path TEXT,
       uploadDate DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `;

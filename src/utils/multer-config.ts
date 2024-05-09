@@ -5,13 +5,13 @@ import { writeFile, mkdir } from "fs/promises"
 const limits = { fileSize: 1000000000 }
 
 const storage = multer.diskStorage({
-    destination: "data/uploads/",
+    destination: "data/vod/",
     filename: async (req, file, cb) => {
         const originalname = file.originalname
         const extension = extname(originalname)
 
         const { company } = req.body
-        const uploadPath = __dirname + "/../.." + "/data/uploads/" + (company ? company + "/" : "")
+        const uploadPath = __dirname + "/../.." + "/data/vod/" + (company ? company + "/" : "")
         await mkdir(uploadPath, { recursive: true })
 
         const filename = `${req.body.company ? req.body.company + "/" : ""}${Date.now()}${extension}`

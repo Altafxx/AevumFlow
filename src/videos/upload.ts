@@ -14,19 +14,32 @@ export const uploadVideo = async (req: Request, res: Response) => {
 
     const { originalname, filename, path, mimetype, size } = req.file
 
+    // const jsonData = {
+    //     originalname: originalname,
+    //     filename: filename,
+    //     path: path,
+    //     mimetype: mimetype,
+    //     size: size,
+    //     company: company ?? null
+    // }
+
     const jsonData = {
-        originalname: originalname,
-        filename: filename,
-        path: path,
-        mimetype: mimetype,
-        size: size,
-        company: company ?? null
+        "sequences": [
+            {
+                "clips": [
+                    {
+                        "type": "source",
+                        "path": `/etc/nginx/vod/${filename}`
+                    }
+                ]
+            },
+        ]
     }
 
-    const uploadPath = __dirname + "/../.." + "/data/uploads/"
+    const uploadPath = __dirname + "/../.." + "/data/json/"
 
     try {
-        await insertVideoData(title, description, filename);
+        await insertVideoData(title, description, filename, `/video/${path}/master.m3u8`);
         // await ffmpegQueue.add({ filename })
 
         await writeFile(uploadPath + filename + ".json", JSON.stringify(jsonData, null, 2));
