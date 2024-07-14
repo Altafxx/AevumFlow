@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { writeFile } from "fs/promises"
+import { writeFile, access, mkdir } from "fs/promises"
 import { insertVideoData } from "../utils/bettersqlite-db"
 import Queue from 'bull';
 
@@ -13,15 +13,6 @@ export const uploadVideo = async (req: Request, res: Response) => {
     }
 
     const { originalname, filename, path, mimetype, size } = req.file
-
-    // const jsonData = {
-    //     originalname: originalname,
-    //     filename: filename,
-    //     path: path,
-    //     mimetype: mimetype,
-    //     size: size,
-    //     company: company ?? null
-    // }
 
     const jsonData = {
         "sequences": [
@@ -39,9 +30,23 @@ export const uploadVideo = async (req: Request, res: Response) => {
     const uploadPath = __dirname + "/../.." + "/data/json/"
     const vidJson = filename.replace('.mp4', '.json')
 
+    if (company) {
+        await access(uploadPath + company)
+            .then(() => {
+                console.log('File already exists, overwriting...')
+            })
+            .catch(() => {
+                mkdir(uploadPath + company)
+            });
+    }
+
     try {
         await insertVideoData(title, description, filename, `/video/${vidJson}/master.m3u8`);
         // await ffmpegQueue.add({ filename })
+
+        console.log('-----------------------------')
+        console.log(uploadPath + vidJson)
+        console.log('-----------------------------')
 
         await writeFile(uploadPath + vidJson, JSON.stringify(jsonData, null, 2));
         console.log(`JSON file created:`);
