@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Video {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  folderID    Int?
+  folder      Folder?  @relation(fields: [folderID], references: [id])
+  path        String
+  filename    String
+  thumbnail   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  path      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Video     Video[]
+}

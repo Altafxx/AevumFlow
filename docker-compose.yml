@@ -1,26 +1,32 @@
-version: "3.8"
-
 services:
-  video:
-    build: 
-      context: .
-      dockerfile: docker/video.Dockerfile
-    volumes:
-      - ./data/json:/etc/nginx/json
-      - ./data/vod:/etc/nginx/vod
-    ports:
-      - "9888:80"
-    restart: unless-stopped
-  app:
-    build: 
-      context: .
-      dockerfile: docker/app.Dockerfile
-    # command: ts-node src/index.ts
-    command: ts-node src/index.ts
-    ports:
-      - 9889:9889
-    volumes: 
-      - ./data/json:/app/data/json
-      - ./data/vod:/app/data/vod
-      - ./data/uploads:/app/data/uploads 
-      - ./src:/app/src
+    video:
+      build: 
+        context: .
+        dockerfile: docker/video.Dockerfile
+      volumes:
+        - ./data/json:/etc/nginx/json
+        - ./data/vod:/etc/nginx/vod
+      ports:
+        - 9888:80
+      restart: unless-stopped
+      networks:
+        - kaltura
+  
+    app:
+      build: 
+        context: .
+        dockerfile: docker/app.Dockerfile
+      command: ts-node src/index.ts
+      ports:
+        - 9889:9889
+      volumes: 
+        - ./data/json:/app/data/json
+        - ./data/vod:/app/data/vod
+        - ./data/uploads:/app/data/uploads 
+        - ./src:/app/src
+      networks:
+        - kaltura
+  
+  networks:
+    kaltura:
+      driver: bridge

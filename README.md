@@ -9,3 +9,6 @@ A dockerized NGINX server that serves VOD content from a Kaltura server. The ser
 ```
 docker-compose up -d --build
 ```
+
+# Arm 64 Support
+Replace **debian:11-slim** to  **arm64v8/debian:11-slim** in docker/app.Dockerfile
