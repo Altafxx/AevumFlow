@@ -7,7 +7,9 @@ export default async function VideoByID({ id }: { id: number }) {
         <main className="flex flex-col min-h-screen place-items-center py-24">
             <div className="font-bold text-2xl">{video?.title}</div>
             <div className="max-w-5xl rounded-md overflow-clip">
-                <VideoPlayer src={video.path} />
+                {
+                    video?.path && <VideoPlayer src={video.path} />
+                }
             </div>
             <div>{video?.description}</div>
 
