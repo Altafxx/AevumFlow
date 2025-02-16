@@ -20,6 +20,7 @@
 # production
 /build
 .env
+/data
 prisma/data.db
 prisma/data.db-journal
 

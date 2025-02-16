@@ -12,7 +12,7 @@ export default function VideoPlayer({ src }: { src: string }) {
         if (!video) return;
 
         video.controls = true;
-        const defaultOptions = {};
+        // const defaultOptions = {};
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
             // This will run in safari, where HLS is supported natively
             video.src = src;
@@ -21,7 +21,8 @@ export default function VideoPlayer({ src }: { src: string }) {
 
             const hls = new Hls();
             hls.loadSource(src);
-            const player = new Plyr(video, defaultOptions);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // const player = new Plyr(video, defaultOptions);
             hls.attachMedia(video);
         } else {
             console.error(
@@ -31,8 +32,8 @@ export default function VideoPlayer({ src }: { src: string }) {
     }, [src, videoRef]);
 
     return (
-        <div id="player">
-            <video data-displaymaxtap ref={videoRef} />
+        <div id="player" className='rounded-md overflow-clip'>
+            <video data-displaymaxtap className='w-full aspect-video' ref={videoRef} />
         </div>
     );
 }

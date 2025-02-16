@@ -2,7 +2,7 @@
 CREATE TABLE "Video" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "title" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
     "folderID" INTEGER,
     "path" TEXT NOT NULL,
     "filename" TEXT NOT NULL,

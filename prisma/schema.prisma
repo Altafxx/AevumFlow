@@ -10,7 +10,7 @@ datasource db {
 model Video {
   id          Int      @id @default(autoincrement())
   title       String
-  description String
+  description String?
   folderID    Int?
   folder      Folder?  @relation(fields: [folderID], references: [id])
   path        String

@@ -4,16 +4,62 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchFolders } from "./action";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod";
+import { uploadVideo } from "@/app/action/video";
+import { createFolder, fetchFolders } from "@/app/action/folder";
+
+interface Folder {
+    id: number;
+    name: string;
+}
 
 export default function Upload() {
-    const [folders, setFolders] = useState<any[]>([]);
-    const [isFetch, setFetch] = useState(false);
+    const [folders, setFolders] = useState<Folder[]>([]);
+    const [isFetch, setFetch] = useState<boolean>(false);
+    const [isSelectDisabled, setSelectDisabled] = useState<boolean>(false)
+
+    const formSchema = z.object({
+        title: z
+            .string()
+            .min(2)
+            .max(50),
+        description: z
+            .string()
+            .optional(),
+        folder: z
+            .string()
+            .optional(),
+        video: z
+            .any()
+            .refine((files) => files instanceof FileList, {
+                message: "Please upload a video.",
+            })
+            .refine((files) => files?.length > 0, {
+                message: "Please upload at least one video.",
+            })
+            .refine((files) => files[0]?.type.startsWith("video/"), {
+                message: "Please upload a valid video file.",
+            })
+
+    })
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: "",
+        },
+    })
+
+    const videoRef = form.register("video");
 
     useEffect(() => {
         const getFolders = async () => {
@@ -35,66 +81,140 @@ export default function Upload() {
         getFolders();
     }, [isFetch]);
 
+    const submitFolder = async (e: HTMLInputElement) => {
+        const res = await createFolder(e.value);
+
+        if (res instanceof Error) {
+            toast.error(res.message);
+            return;
+        }
+
+        setFolders([...folders, res.folder]);
+        toast.success(res.message);
+    }
+
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        const { title, description, video, folder } = data;
+        const res = await uploadVideo(title, video[0], description, folder);
+
+        if (res instanceof Error) {
+            toast.error(res.message);
+            return;
+        }
+
+        toast.success(res.message);
+    }
+
     return (
         <main className="flex flex-col min-h-screen place-items-center py-24">
             <div className="font-bold text-2xl">Upload Video</div>
-            <form className="flex flex-col space-y-4">
-                <section>
-                    <Label htmlFor="title">Title</Label>
-                    <Input id="title" placeholder="Title" type="text" />
-                </section>
-                <section>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" placeholder="Description" />
-                </section>
-                <section>
-                    <Label htmlFor="video">Video</Label>
-                    <Input id="video" type="file" />
-                    {/* <Filezone /> */}
-                </section>
-                <section>
-                    <Label htmlFor="folder">Folder</Label>
-                    <Select>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select folder" id="folder" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {folders.map((folder) => (
-                                <SelectItem key={folder.id} value={folder.id.toString()}>{folder.name}</SelectItem>
-                            ))}
-                            {
-                                folders.length === 0 && <SelectItem value="0" disabled>No folder found</SelectItem>
-                            }
-                            <Separator />
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant={"ghost"} className="min-w-full"> <Plus className="mr-2" />Create folder</Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle>Create a folder</DialogTitle>
-                                        <DialogDescription>
-                                            Create a new folder here. Click create when you're done.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="name" className="text-right">
-                                                Name
-                                            </Label>
-                                            <Input id="name" placeholder="Folder name" className="col-span-3" />
-                                        </div>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button type="submit">Create</Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
-                        </SelectContent>
-                    </Select>
-                </section>
-                <Button type="submit">Upload</Button>
-            </form>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Title</FormLabel>
+                                <FormControl>
+                                    <Input id="title" placeholder="Title" type="text" {...field} />
+                                </FormControl>
+                                <FormDescription>Title of the video</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Textarea id="description" placeholder="Description" {...field} />
+                                </FormControl>
+                                <FormDescription>Description of the video</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="video"
+                        render={() => (
+                            <FormItem>
+                                <FormLabel>Video</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        id="video"
+                                        type="file"
+                                        {...videoRef}
+                                    />
+                                </FormControl>
+                                <FormDescription>Description of the video</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="folder"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Folder</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        // value={field.value}
+                                        {...field}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select folder" id="folder" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {folders.map((folder) => (
+                                                <SelectItem key={folder.id} disabled={isSelectDisabled} value={folder.id.toString()}>{folder.name}</SelectItem>
+                                            ))}
+                                            {
+                                                folders.length === 0 && <SelectItem value="0" disabled>No folder found</SelectItem>
+                                            }
+                                            <Separator />
+                                            <Dialog onOpenChange={() => setSelectDisabled(!isSelectDisabled)}>
+                                                <DialogTrigger asChild>
+                                                    <Button variant={"ghost"} className="min-w-full"> <Plus className="mr-2" />Create folder</Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[425px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Create a folder</DialogTitle>
+                                                        <DialogDescription>
+                                                            Create a new folder here. Click create when you&apos;re done.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="grid gap-4 py-4">
+                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                            <Label htmlFor="name" className="text-right">
+                                                                Name
+                                                            </Label>
+                                                            <Input id="name" placeholder="Folder name" className="col-span-3" />
+                                                        </div>
+                                                    </div>
+                                                    <DialogFooter>
+                                                        <Button type="button" onClick={() => submitFolder((document.getElementById("name") as HTMLInputElement))}>Create</Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormDescription>Folder to store the video</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <Button type="submit">Upload</Button>
+                </form>
+            </Form>
         </main>
     );
 }

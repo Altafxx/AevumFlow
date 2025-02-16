@@ -5,7 +5,9 @@ import { Card, CardContent, CardFooter, CardHeader } from './ui/card'
 
 export default function Filezone() {
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        // Do something with the files
+        if (acceptedFiles.length > 0) {
+            console.log(acceptedFiles);
+        }
     }, [])
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
@@ -17,7 +19,7 @@ export default function Filezone() {
                 {
                     isDragActive ?
                         <p>Drop the files here ...</p> :
-                        <p>Drag 'n' drop some files here, or click to select files</p>
+                        <p>Drag &apos;n&apos; drop some files here, or click to select files</p>
                 }
             </CardContent>
             <CardFooter />

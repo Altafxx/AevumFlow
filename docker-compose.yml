@@ -7,7 +7,7 @@ services:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
       ports:
-        - 9888:80
+        - 3000:80
       restart: unless-stopped
       networks:
         - kaltura
@@ -16,9 +16,7 @@ services:
       build: 
         context: .
         dockerfile: docker/app.Dockerfile
-      command: ts-node src/index.ts
-      ports:
-        - 9889:9889
+      command: npm run start
       volumes: 
         - ./data/json:/app/data/json
         - ./data/vod:/app/data/vod
@@ -27,6 +25,6 @@ services:
       networks:
         - kaltura
   
-  networks:
-    kaltura:
-      driver: bridge
+networks:
+  kaltura:
+    driver: bridge
