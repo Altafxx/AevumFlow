@@ -3,6 +3,7 @@ import Link from "next/link";
 import { fetchVideos } from "../action/video";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import { Video, Folder } from "@prisma/client";
 export default async function Home() {
   const videos = await fetchVideos();
 
@@ -16,7 +17,7 @@ export default async function Home() {
       </Button>
       <div className="max-w-5xl w-full max-xl:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {
-          videos && videos.map((video) => (
+          videos && videos.map((video: Video & { folder: Folder | null }) => (
             <Link href={`/${video?.id}`} key={video?.id}>
               <Card key={video?.id} className="h-full">
                 <CardHeader className="relative">
