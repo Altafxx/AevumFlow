@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
-import Plyr from 'plyr';
+// import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 
 export default function VideoPlayer({ src }: { src: string }) {
