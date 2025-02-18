@@ -3,6 +3,7 @@
 import { db } from "@/lib/db-client";
 import { randomUUID } from "crypto";
 import { writeFile } from "fs/promises";
+import { revalidatePath } from "next/cache";
 import path from "path";
 
 export async function fetchVideos() {
@@ -72,6 +73,8 @@ export async function uploadVideo(title: string, file: File, description?: strin
             ...struct
         }
     })
+
+    revalidatePath('/')
 
     return {
         message: 'Video uploaded',

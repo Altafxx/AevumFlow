@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
-// import Plyr from 'plyr';
+import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 
 export default function VideoPlayer({ src }: { src: string }) {
@@ -11,18 +11,26 @@ export default function VideoPlayer({ src }: { src: string }) {
         const video = videoRef.current;
         if (!video) return;
 
-        video.controls = true;
-        // const defaultOptions = {};
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            // This will run in safari, where HLS is supported natively
-            video.src = src;
-        } else if (Hls.isSupported()) {
-            // This will run in all other modern browsers
+        const https = process.env.NODE_ENV === 'production' ? 'https://' : 'http://';
 
-            const hls = new Hls();
-            hls.loadSource(src);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            // const player = new Plyr(video, defaultOptions);
+        // Force HTTPS
+        const secureUrl = src.replace('http://', https);
+
+        video.controls = true;
+        const defaultOptions = {};
+
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = secureUrl;
+        } else if (Hls.isSupported()) {
+            const hls = new Hls({
+                xhrSetup: (xhr, url) => {
+                    // Force HTTPS for all HLS requests
+                    xhr.open('GET', url.replace('http://', https));
+                }
+            });
+            hls.loadSource(secureUrl);
+            // eslint-disable-next-line  no-unused-vars
+            const player = new Plyr(video, defaultOptions);
             hls.attachMedia(video);
         } else {
             console.error(
