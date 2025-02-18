@@ -29,7 +29,7 @@ export default function VideoPlayer({ src }: { src: string }) {
                 }
             });
             hls.loadSource(secureUrl);
-            // eslint-disable-next-line  no-unused-vars
+            /* eslint-disable @typescript-eslint/no-unused-vars */
             const player = new Plyr(video, defaultOptions);
             hls.attachMedia(video);
         } else {
