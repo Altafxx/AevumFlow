@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     sqlite3 \
     python3-pip \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
