@@ -5,8 +5,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Image from "next/image";
 import { Video, Folder } from "@prisma/client";
 
-// export const fetchCache = 'force-no-store';
-
 export default async function Home() {
   const videos = await fetchVideos();
 
