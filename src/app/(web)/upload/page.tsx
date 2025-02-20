@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { LoaderPinwheel, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,8 @@ import { useForm } from "react-hook-form"
 import { z } from "zod";
 import { uploadVideo } from "@/app/action/video";
 import { createFolder, fetchFolders } from "@/app/action/folder";
+import { useRouter } from 'next/navigation'
+// import { Progress } from "@/components/ui/progress";
 
 interface Folder {
     id: number;
@@ -26,6 +28,9 @@ export default function Upload() {
     const [folders, setFolders] = useState<Folder[]>([]);
     const [isFetch, setFetch] = useState<boolean>(false);
     const [isSelectDisabled, setSelectDisabled] = useState<boolean>(false)
+    // const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const router = useRouter()
 
     const formSchema = z.object({
         title: z
@@ -95,14 +100,25 @@ export default function Upload() {
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const { title, description, video, folder } = data;
-        const res = await uploadVideo(title, video[0], description, folder);
 
-        if (res instanceof Error) {
-            toast.error(res.message);
-            return;
+        try {
+            toast.promise(
+                uploadVideo(title, video[0], description, folder).then(() => router.refresh()),
+                {
+                    loading: 'Uploading video...',
+                    success: 'Video uploaded successfully',
+                    error: (err) => `Upload failed: ${err.message}`
+                }
+            );
+
+            form.reset();
+
+            setIsUploading(false);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to start upload");
+            setIsUploading(false);
         }
-
-        toast.success(res.message);
     }
 
     return (
@@ -129,7 +145,7 @@ export default function Upload() {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>Description (Optional)</FormLabel>
                                 <FormControl>
                                     <Textarea id="description" placeholder="Description" {...field} />
                                 </FormControl>
@@ -161,7 +177,7 @@ export default function Upload() {
                         name="folder"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Folder</FormLabel>
+                                <FormLabel>Folder (Optional)</FormLabel>
                                 <FormControl>
                                     <Select
                                         onValueChange={field.onChange}
@@ -212,7 +228,18 @@ export default function Upload() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit">Upload</Button>
+                    {/* {isUploading && (
+                        <div className="space-y-2">
+                            <div className="flex justify-center text-sm text-gray-500">
+                                <span>Uploading...</span>
+                                <span>{uploadProgress}%</span>
+                            </div>
+                            <Progress value={uploadProgress} />
+                        </div>
+                    )} */}
+                    <Button type="submit" disabled={isUploading}>
+                        {isUploading ? <LoaderPinwheel className=" animate-spin duration-1000" /> : "Upload"}
+                    </Button>
                 </form>
             </Form>
         </main>

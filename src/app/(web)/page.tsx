@@ -22,14 +22,14 @@ export default async function Home() {
             <Link href={`/${video?.id}`} key={video?.id}>
               <Card key={video?.id} className="h-full">
                 <CardHeader className="relative">
-                  <Image
-                    src={video?.thumbnail ?? "/thumbnail.webp"}
-                    alt={video?.title}
-                    width={640}
-                    height={360}
-                    layout="responsive"
-                    className="rounded-t-lg"
-                  />
+                  <div className="overflow-clip rounded-md">
+                    <Image
+                      src={video?.thumbnail ?? "/thumbnail.webp"}
+                      alt={video?.title}
+                      width={640}
+                      height={360}
+                    />
+                  </div>
                   {
                     video?.folder?.name && (
                       <div className="flex absolute right-2 top-2 bg-primary text-secondary rounded-md px-4 py-2">{video?.folder?.name}</div>

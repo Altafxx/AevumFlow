@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { notFound } from "next/navigation";
 
 
-export default async function VideoByID({ params }: { params: Promise<{ id: number }> }) {
+export default async function VideoByID({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const video = await fetchVideoByID(+id);
 
