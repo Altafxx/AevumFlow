@@ -15,6 +15,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         headers.set("Content-Type", "image/webp");
 
         return new NextResponse(buffer, { status: 200, statusText: "OK", headers });
+
+        /* eslint-disable @typescript-eslint/no-unused-vars */
     } catch (_) {
         redirect('/thumbnail.webp');
     }

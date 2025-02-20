@@ -9,8 +9,9 @@ const nextConfig: NextConfig = {
         "localhost:3000",
         "app:3000"
       ],
-    }
-  }
+    },
+  },
+  serverExternalPackages: ["fluent-ffmpeg"]
 };
 
 export default nextConfig;
