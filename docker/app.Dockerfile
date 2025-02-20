@@ -35,6 +35,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     openssl \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.next ./.next

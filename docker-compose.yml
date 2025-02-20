@@ -21,7 +21,7 @@ services:
         - ./data/json:/app/data/json
         - ./data/vod:/app/data/vod
         - ./data/uploads:/app/data/uploads 
-        - ./data/thumbnails:/data/thumbnails
+        - ./data/thumbnails:app/data/thumbnails
         - ./src:/app/src
         - ./prisma/data.db:/app/prisma/data.db
       networks:
