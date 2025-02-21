@@ -24,7 +24,7 @@ export default async function Home() {
                 <CardHeader className="relative">
                   <div className="overflow-clip rounded-md">
                     <Image
-                      src={video?.thumbnail?.replace('/thumbnails', '/thumbnail') ?? "/thumbnail.webp"}
+                      src={video?.thumbnail ?? "/thumbnail.webp"}
                       alt={video?.title}
                       width={640}
                       height={360}
@@ -42,7 +42,7 @@ export default async function Home() {
                 </CardContent>
                 <CardFooter>
                   <div className="text-sm text-gray-500">
-                    {new Date(video?.createdAt).toUTCString()}
+                    {new Date(video?.createdAt).toLocaleString()}
                   </div>
                 </CardFooter>
               </Card>
