@@ -24,7 +24,7 @@ export default async function Home() {
                 <CardHeader className="relative">
                   <div className="overflow-clip rounded-md">
                     <Image
-                      src={video?.thumbnail ?? "/thumbnail.webp"}
+                      src={video?.thumbnail?.replace('/thumbnails', '/thumbnail') ?? "/thumbnail.webp"}
                       alt={video?.title}
                       width={640}
                       height={360}
