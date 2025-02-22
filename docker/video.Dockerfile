@@ -1,4 +1,5 @@
-FROM debian:11-slim AS builder
+ARG USING_ARM=false
+FROM ${USING_ARM:+arm64v8/}debian:11-slim AS builder
 
 # Base dependencies
 RUN apt-get update && apt-get install -y \
@@ -65,7 +66,8 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
 # Final stage
-FROM debian:11-slim
+ARG USING_ARM
+FROM ${USING_ARM:+arm64v8/}debian:11-slim
 
 # Copy only necessary files from builder
 COPY --from=builder /etc/nginx /etc/nginx
