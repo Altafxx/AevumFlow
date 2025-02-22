@@ -10,13 +10,11 @@ export default async function VideoByID({ params }: { params: Promise<{ id: stri
 
     if (!video) notFound()
 
-    const src = process.env.VIDEO_URL + video?.path;
-
     return (
         <main className="flex flex-col min-h-screen place-items-center py-24 px-4 space-y-4">
             <div className="max-w-5xl rounded-md overflow-clip w-full">
                 {
-                    video?.path && <VideoPlayer src={src} />
+                    video?.path && <VideoPlayer src={video?.path} />
                 }
             </div>
             <Card className="relative max-w-5xl w-full">
