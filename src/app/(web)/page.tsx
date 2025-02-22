@@ -4,6 +4,7 @@ import { fetchVideos } from "../action/video";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { Video, Folder } from "@prisma/client";
+// import { checkThumbnail } from "../action/thumbnail";
 
 export default async function Home() {
   const videos = await fetchVideos();
@@ -24,7 +25,7 @@ export default async function Home() {
                 <CardHeader className="relative">
                   <div className="overflow-clip rounded-md">
                     <Image
-                      src={video?.thumbnail ?? "/thumbnail.webp"}
+                      src={video.thumbnail ? "http://minio:9000" + video.thumbnail + ".webp" : "/thumbnail.webp"}
                       alt={video?.title}
                       width={640}
                       height={360}
@@ -51,7 +52,7 @@ export default async function Home() {
         }
         {
           videos.length === 0 && (
-            <div className="text-center text-gray-500">
+            <div className="text-center col-span-3 text-gray-500">
               No videos found
             </div>
           )

@@ -1,11 +1,13 @@
 "use server"
 
 import { db } from "@/lib/db-client";
+import { minioClient } from "@/lib/minio-client";
 import { randomUUID } from "crypto";
 import Ffmpeg from "fluent-ffmpeg";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import path from "path";
+import path, { join } from "path";
+import { initializeMinio } from "./minio";
 
 export async function fetchVideos() {
     return await db.video.findMany({
@@ -30,6 +32,8 @@ export async function fetchVideoByID(id: number) {
 export async function uploadVideo(title: string, file: File, description?: string, folderID?: string) {
     if (!file) return Error('No file provided');
     if (!title) return Error('No title provided');
+
+    await initializeMinio()
 
     const ext = path.extname(file.name);
     const fileName = randomUUID();
@@ -60,6 +64,14 @@ export async function uploadVideo(title: string, file: File, description?: strin
     const buffer = Buffer.from(await file.arrayBuffer());
     const jsonbuffer = Buffer.from(JSON.stringify(source));
 
+    Ffmpeg(videopath)
+        .takeScreenshots({
+            count: 1,
+            timemarks: ['2'], // number of seconds
+            filename: fileName + '.webp',
+        }, process.cwd() + "/data/thumbnails/"
+        )
+
     await writeFile(
         jsonpath,
         jsonbuffer
@@ -70,13 +82,12 @@ export async function uploadVideo(title: string, file: File, description?: strin
         buffer
     );
 
-    Ffmpeg(videopath)
-        .takeScreenshots({
-            count: 1,
-            timemarks: ['3'], // number of seconds
-            filename: fileName + '.webp',
-        }, process.cwd() + "/data/thumbnails/"
-        );
+    /* NOTES: Purposely delay to resolve file not found*/
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    await minioClient.fPutObject('thumbnails', fileName + ".webp", join(process.cwd(), "/data/thumbnails/", fileName + ".webp"), {
+        'Content-Type': 'image/webp'
+    });
 
     const video = await db.video.create({
         data: {
