@@ -43,7 +43,14 @@ export default async function Home() {
                 </CardContent>
                 <CardFooter>
                   <div className="text-sm text-gray-500">
-                    {new Date(video?.createdAt).toLocaleString()}
+                    {new Date(video?.createdAt).toLocaleString(undefined, {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit'
+                    })}
                   </div>
                 </CardFooter>
               </Card>
