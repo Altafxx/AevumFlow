@@ -1,0 +1,12 @@
+{
+    "sequences": [
+        {
+            "clips": [
+                {
+                    "type": "source",
+                    "path": "/etc/nginx/vod/1720963975196.mp4"
+                }
+            ]
+        }
+    ]
+}
