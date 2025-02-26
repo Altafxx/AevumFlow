@@ -4,7 +4,7 @@ services:
         context: .
         dockerfile: docker/video.Dockerfile
         args:
-          - USING_ARM=${USING_ARM}
+          USING_ARM: ${USING_ARM:-false}
       volumes:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
