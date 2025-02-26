@@ -58,7 +58,7 @@ export async function uploadVideo(title: string, file: File, description?: strin
         ]
     }
 
-    if (folder) struct['folderID'] = +folder
+    if (folder && folderID) struct['folderID'] = +folderID
     if (description) struct['description'] = description
 
     const buffer = Buffer.from(await file.arrayBuffer());
