@@ -1,7 +1,10 @@
 ARG USING_ARM=false
-FROM ${USING_ARM:+arm64v8/}debian:11-slim AS builder
 
-# Base dependencies
+# First stage - Builder
+FROM debian:11-slim AS builder
+ARG USING_ARM
+
+# Install architecture-specific dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     wget \
@@ -22,9 +25,9 @@ RUN apt-get update && apt-get install -y \
     libvpx-dev \
     libaio-dev \
     ffmpeg \
-    gcc-aarch64-linux-gnu \
     libc6-dev \
-    linux-libc-dev
+    linux-libc-dev \
+    ${USING_ARM:+"gcc-aarch64-linux-gnu"}
 
 # Set locale
 ENV LC_ALL=C.UTF-8
@@ -66,8 +69,8 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
 # Final stage
+FROM debian:11-slim
 ARG USING_ARM
-FROM ${USING_ARM:+arm64v8/}debian:11-slim
 
 # Copy only necessary files from builder
 COPY --from=builder /etc/nginx /etc/nginx
