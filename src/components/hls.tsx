@@ -11,7 +11,7 @@ export default function VideoPlayer({ src }: { src: string }) {
         const video = videoRef.current;
         if (!video) return;
 
-        const https = process.env.NODE_ENV !== 'production' ? 'https://' : 'http://';
+        const https = process.env.NODE_ENV == 'production' ? 'https://' : 'http://';
 
         // Force HTTPS
         const secureUrl = src.replace('http://', https);
