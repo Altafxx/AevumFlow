@@ -1,13 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db-client";
-import { minioClient } from "@/lib/minio-client";
 import { randomUUID } from "crypto";
-import Ffmpeg from "fluent-ffmpeg";
 import { writeFile } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import path, { join } from "path";
 import { initializeMinio } from "./minio";
+import { Worker } from 'worker_threads';
 
 export async function fetchVideos() {
     return await db.video.findMany({
@@ -64,40 +63,22 @@ export async function uploadVideo(title: string, file: File, description?: strin
     const buffer = Buffer.from(await file.arrayBuffer());
     const jsonbuffer = Buffer.from(JSON.stringify(source));
 
-    Ffmpeg(videopath)
-        .takeScreenshots({
-            count: 1,
-            timemarks: ['2'], // number of seconds
-            filename: fileName + '.webp',
-        }, process.cwd() + "/data/thumbnails/"
-        )
+    await writeFile(jsonpath, jsonbuffer);
+    await writeFile(videopath, buffer);
 
-    await writeFile(
-        jsonpath,
-        jsonbuffer
-    );
-
-    await writeFile(
-        videopath,
-        buffer
-    );
-
-    /* NOTES: Purposely delay to resolve file not found*/
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
-    await minioClient.fPutObject('thumbnails', fileName + ".webp", join(process.cwd(), "/data/thumbnails/", fileName + ".webp"), {
-        'Content-Type': 'image/webp'
-    });
-
+    // Create video entry first without thumbnail
     const video = await db.video.create({
         data: {
             title,
             filename: file.name,
             path: "/video/" + fileName + ".json/master.m3u8",
-            thumbnail: "/thumbnails/" + fileName,
+            thumbnail: null, // Set to null initially
             ...struct
         }
     })
+
+    // Start thumbnail generation in worker
+    generateThumbnailInWorker(fileName, videopath, video.id);
 
     revalidatePath('/')
 
@@ -105,5 +86,29 @@ export async function uploadVideo(title: string, file: File, description?: strin
         message: 'Video uploaded',
         video
     }
+}
 
-} 
+async function generateThumbnailInWorker(fileName: string, videopath: string, videoId: number) {
+    try {
+        const worker = new Worker(join(process.cwd(), 'src', 'workers', 'thumbnail-worker.ts'), {
+            workerData: {
+                env: process.env
+            },
+            execArgv: ['--require', 'ts-node/register']
+        });
+
+        worker.postMessage({ fileName, videopath, videoId });
+
+        worker.on('error', (error) => {
+            console.error('Thumbnail worker error:', error);
+        });
+
+        worker.on('exit', (code) => {
+            if (code !== 0) {
+                console.error(`Thumbnail worker stopped with exit code ${code}`);
+            }
+        });
+    } catch (error) {
+        console.error('Failed to start thumbnail worker:', error);
+    }
+}
