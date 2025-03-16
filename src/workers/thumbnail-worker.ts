@@ -46,6 +46,7 @@ parentPort?.on('message', async (data: {
         });
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const test = await fetch("http://localhost:3000/api/revalidate?path=/");
             await fetch("http://localhost:3000/api/revalidate?path=/" + data.videoId);
 

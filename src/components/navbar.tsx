@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Upload, Home, FolderIcon } from "lucide-react";
+import { AuthStatus } from "./auth-status";
 
 export default function Navbar() {
     return (
@@ -33,6 +34,9 @@ export default function Navbar() {
                                 <span className="hidden sm:inline">Upload</span>
                             </Link>
                         </Button>
+                        <div className="pl-4 border-l">
+                            <AuthStatus />
+                        </div>
                     </div>
                 </div>
             </div>

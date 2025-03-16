@@ -1,9 +1,11 @@
 import { fetchVideoByID } from "@/app/action/video";
 import VideoPlayer from "@/components/hls";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+// import { CardFooter } from "@/components/ui/card";
 import { notFound } from "next/navigation";
-import { Clock, Share2, FolderIcon, Heart, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Clock, FolderIcon, } from "lucide-react";
+// import { Share2, Heart, MessageSquare } from "lucide-react";
+// import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default async function VideoByID({ params }: { params: Promise<{ id: string }> }) {

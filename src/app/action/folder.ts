@@ -52,6 +52,7 @@ export async function deleteFolder(id: number) {
 
         revalidatePath('/folders');
         return { message: 'Folder deleted successfully' };
+        //eslint-disable-next-line  @typescript-eslint/no-unused-vars
     } catch (error) {
         return Error('Failed to delete folder');
     }

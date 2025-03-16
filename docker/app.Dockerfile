@@ -44,8 +44,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma 
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/.env ./
-COPY --from=builder /app/src/lib/next-config ./src/lib/next-config
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./
 
 # Optional: Add healthcheck (adjust port if necessary)
 # HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

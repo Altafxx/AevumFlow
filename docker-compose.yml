@@ -8,6 +8,7 @@ services:
       volumes:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
+        - ./docker/nginx.conf:/etc/nginx/nginx.conf
       ports:
         - 3000:80
       restart: unless-stopped
