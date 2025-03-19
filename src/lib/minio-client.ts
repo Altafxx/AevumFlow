@@ -1,10 +1,12 @@
 import * as Minio from 'minio'
-// const Minio = require('minio');
+import defaultConfig from './default-config';
+
+const config = defaultConfig();
 
 export const minioClient = new Minio.Client({
-    endPoint: process.env.MINIO_ENDPOINT || "localhost",
-    port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT) : parseInt("9000"),
-    useSSL: process.env.MINIO_USE_SSL === "true",
-    accessKey: process.env.MINIO_ACCESS_KEY || "minioadmin",
-    secretKey: process.env.MINIO_SECRET_KEY || "minioadmin",
+    endPoint: config.minio.endPoint,
+    port: config.minio.port,
+    useSSL: config.minio.useSSL,
+    accessKey: config.minio.accessKey,
+    secretKey: config.minio.secretKey,
 });

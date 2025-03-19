@@ -3,16 +3,19 @@ import Ffmpeg from 'fluent-ffmpeg';
 import { join } from 'path';
 import { PrismaClient } from '@prisma/client';
 import { Client } from 'minio';
+import defaultConfig from '../lib/default-config';
 
 const db = new PrismaClient();
 
 // Initialize Minio client in the worker
+const config = defaultConfig();
+
 const minioClient = new Client({
-    endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-    port: parseInt(process.env.MINIO_PORT || '9000'),
-    useSSL: process.env.MINIO_USE_SSL === 'true',
-    accessKey: process.env.MINIO_ACCESS_KEY || 'root',
-    secretKey: process.env.MINIO_SECRET_KEY || 'password',
+    endPoint: config.minio.endPoint,
+    port: config.minio.port,
+    useSSL: config.minio.useSSL,
+    accessKey: config.minio.accessKey,
+    secretKey: config.minio.secretKey,
 });
 
 parentPort?.on('message', async (data: {
