@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { registerUser } from "@/app/action/auth"
 
 type FormData = {
     email: string
@@ -22,19 +23,7 @@ export default function Register() {
     const onSubmit = async (data: FormData) => {
         try {
             setIsLoading(true)
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-
-            if (!response.ok) {
-                const error = await response.text()
-                throw new Error(error)
-            }
-
+            await registerUser(data.email, data.name, data.password)
             toast.success('Registration successful')
             router.push('/login')
         } catch (error) {

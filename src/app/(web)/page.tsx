@@ -28,14 +28,14 @@ export default async function Home() {
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link href="/explore">
+            <Link href="#explore">
               Explore Videos
             </Link>
           </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="explore" className="max-w-7xl w-full py-8 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {videos && videos.map((video: Video & { folder: Folder | null }) => (
           <Link href={`/${video?.id}`} key={video?.id} className="group">
             <Card className="h-full overflow-hidden border bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300">
