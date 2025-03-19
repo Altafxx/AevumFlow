@@ -9,6 +9,7 @@ services:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
         - ./docker/nginx.conf:/etc/nginx/nginx.conf
+        - ./docker/kalturalog.txt:/etc/logrotate.d/nginx
       ports:
         - 3000:80
       restart: unless-stopped

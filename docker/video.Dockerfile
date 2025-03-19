@@ -36,14 +36,14 @@ ENV LANG=C.UTF-8
 WORKDIR /tmp
 
 # Download and extract nginx
-RUN wget http://nginx.org/download/nginx-1.25.4.tar.gz && \
-    tar -zxvf nginx-1.25.4.tar.gz
+RUN wget https://nginx.org/download/nginx-1.27.4.tar.gz && \
+    tar -zxvf nginx-1.27.4.tar.gz
 
 # Download and extract vod module
 RUN wget https://github.com/kaltura/nginx-vod-module/archive/refs/tags/1.33.tar.gz && \
     tar -zxvf 1.33.tar.gz
 
-WORKDIR /tmp/nginx-1.25.4
+WORKDIR /tmp/nginx-1.27.4
 
 # Configure and build nginx
 RUN ./configure --prefix=/etc/nginx \
@@ -56,9 +56,10 @@ RUN ./configure --prefix=/etc/nginx \
     --with-http_v2_module \
     --with-http_stub_status_module \
     --with-http_realip_module \
+    --with-file-aio \
     --with-threads \
     --with-stream \
-    --with-cc-opt="-O2" \
+    --with-cc-opt="-O3 -mpopcnt" \
     --add-module=../nginx-vod-module-1.33
 
 RUN make -j$(nproc) && make install
