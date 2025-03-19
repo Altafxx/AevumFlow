@@ -63,8 +63,14 @@ export async function uploadVideo(title: string, file: File, description?: strin
     const buffer = Buffer.from(await file.arrayBuffer());
     const jsonbuffer = Buffer.from(JSON.stringify(source));
 
-    await writeFile(jsonpath, jsonbuffer);
-    await writeFile(videopath, buffer);
+    // Write files and wait for completion
+    await Promise.all([
+        writeFile(jsonpath, jsonbuffer),
+        writeFile(videopath, buffer)
+    ]);
+
+    // Add a small delay to ensure files are fully written
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Create video entry first without thumbnail
     const video = await db.video.create({
@@ -72,15 +78,16 @@ export async function uploadVideo(title: string, file: File, description?: strin
             title,
             filename: file.name,
             path: "/video/" + fileName + ".json/master.m3u8",
-            thumbnail: null, // Set to null initially
+            thumbnail: null,
             ...struct
         }
-    })
+    });
 
     // Start thumbnail generation in worker
     generateThumbnailInWorker(fileName, videopath, video.id);
 
-    revalidatePath('/')
+    // Revalidate after ensuring files are written
+    revalidatePath('/');
 
     return {
         message: 'Video uploaded',
