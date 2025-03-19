@@ -14,7 +14,7 @@ export default function Footer() {
                         <span className="font-medium">VOD Engine</span>
                     </div>
                     <Link
-                        href="https://github.com/your-repo"
+                        href="https://github.com/Altafxx/nginx-vod-microservice"
                         target="_blank"
                         className="text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -25,3 +25,7 @@ export default function Footer() {
         </footer>
     );
 }
+
+// https://vod.danielaltaf.dev/video/5cdfbbd7-9f86-4f29-a967-67d6df55d0c1.json/master.m3u8
+// https://vod.danielaltaf.dev/video/597554da-6282-4a93-92a8-f09eb4c756b0.json/master.m3u8
+
