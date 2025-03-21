@@ -5,6 +5,8 @@ services:
         dockerfile: docker/video.Dockerfile
         args:
           USING_ARM: ${USING_ARM:-false}
+      environment:
+        - LOCALHOST=${LOCALHOST:-false}
       volumes:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
