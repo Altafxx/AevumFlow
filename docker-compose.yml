@@ -3,8 +3,8 @@ services:
       build: 
         context: .
         dockerfile: docker/video.Dockerfile
-        args:
-          USING_ARM: ${USING_ARM:-false}
+        platforms:
+          - ${TARGETPLATFORM:-linux/${HOSTARCH:-amd64}}
       environment:
         - LOCALHOST=${LOCALHOST:-false}
       volumes:
@@ -22,6 +22,8 @@ services:
       build: 
         context: .
         dockerfile: docker/app.Dockerfile
+        platforms:
+          - ${TARGETPLATFORM:-linux/${HOSTARCH:-amd64}}
       command: npm run start
       volumes: 
         - ./data/json:/app/data/json
@@ -37,6 +39,7 @@ services:
 
     minio:
       image: minio/minio
+      platform: ${TARGETPLATFORM:-linux/${HOSTARCH:-amd64}}
       ports:
         - "9000:9000"
         - "${MINIO_CONSOLE_PORT:-9001}:9001"

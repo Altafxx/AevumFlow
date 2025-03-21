@@ -37,15 +37,32 @@ git clone https://github.com/Altafxx/nginx-vod-microservice.git
 cd nginx-kaltura-vod
 ```
 
-2. Create required directories :
+2. Create required directories:
 ```bash
 mkdir -p data/vod data/json data/upload data/thumbnails
 ```
 
-3. Build and start the container:
-```bash
-docker-compose up -d --build
-```
+3. Build and start the containers:
+
+   - Auto-detect architecture and build:
+   ```bash
+   npm run docker:up
+   ```
+
+   - Force ARM64 build (e.g., for M1/M2 Macs, Raspberry Pi):
+   ```bash
+   npm run docker:up:arm
+   ```
+
+   - Force AMD64 build (e.g., for Intel/AMD systems):
+   ```bash
+   npm run docker:up:amd
+   ```
+
+   - Stop the containers:
+   ```bash
+   npm run docker:down
+   ```
 
 ## Architecture Support
 

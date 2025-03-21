@@ -1,13 +1,20 @@
 {
   "name": "nginx-kaltura-vod",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx prisma migrate dev"
+    "migrate": "npx prisma migrate dev",
+    "docker:up": "./detect-arch.sh up",
+    "docker:build": "./detect-arch.sh build",
+    "docker:up:arm": "TARGETPLATFORM=linux/arm64 ./detect-arch.sh up",
+    "docker:up:amd": "TARGETPLATFORM=linux/amd64 ./detect-arch.sh up",
+    "docker:down": "docker compose down",
+    "docker:test:arm": "docker run --rm --privileged multiarch/qemu-user-static --reset -p yes && npm run docker:up:arm",
+    "docker:inspect": "docker inspect $(docker ps -q) | grep Architecture"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
