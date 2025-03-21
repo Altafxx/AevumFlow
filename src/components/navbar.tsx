@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { Upload, Home, FolderIcon } from "lucide-react";
 import { AuthStatus } from "./auth-status";
+import { ThemeToggle } from "./theme-toggle";
 
 export default function Navbar() {
     return (
@@ -34,7 +35,8 @@ export default function Navbar() {
                                 <span className="hidden sm:inline">Upload</span>
                             </Link>
                         </Button>
-                        <div className="pl-4 border-l">
+                        <div className="flex flex-row pl-4 border-l">
+                            <ThemeToggle />
                             <AuthStatus />
                         </div>
                     </div>
