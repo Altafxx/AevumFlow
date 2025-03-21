@@ -35,6 +35,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     openssl \
     ffmpeg \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.next ./.next
@@ -44,11 +45,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma 
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/.env ./
-COPY --from=builder /app/src/lib/next-config ./src/lib/next-config
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./
 
-# Optional: Add healthcheck (adjust port if necessary)
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-#     CMD node -e "require('http').get('http://localhost:3000/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/api/videos || exit 1
 
 CMD ["npm", "run", "start"]

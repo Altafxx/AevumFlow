@@ -6,12 +6,13 @@ import 'plyr/dist/plyr.css';
 
 export default function VideoPlayer({ src }: { src: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const localhost = process.env.LOCALHOST
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        const https = process.env.NODE_ENV == 'production' ? 'https://' : 'http://';
+        const https = localhost ? 'http://' : 'https://';
 
         // Force HTTPS
         const secureUrl = src.replace('http://', https);
@@ -22,16 +23,16 @@ export default function VideoPlayer({ src }: { src: string }) {
         if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = secureUrl;
         } else if (Hls.isSupported()) {
-            const hls = process.env.LOCALHOST
-                ? new Hls()
-                : new Hls(
-                    {
-                        xhrSetup: (xhr, url) => {
-                            // Force HTTPS for all HLS requests
-                            xhr.open('GET', url.replace('http://', https));
-                        }
+
+            const hls = localhost
+                ? new Hls({
+                    xhrSetup: (xhr, url) => {
+                        // Force HTTPS for all HLS requests
+                        xhr.open('GET', url.replace('http://', https));
                     }
-                );
+                })
+                : new Hls({})
+
             hls.loadSource(secureUrl);
             /* eslint-disable @typescript-eslint/no-unused-vars */
             const player = new Plyr(video, defaultOptions);
