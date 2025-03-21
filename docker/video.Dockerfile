@@ -39,27 +39,26 @@ WORKDIR /tmp
 # Copy and extract modules from assets directory
 COPY docker/assets/nginx-1.27.4.tar.gz \
      docker/assets/nginx-vod-module-1.33.tar.gz \
-     docker/assets/luajit-2.0-538a821.tar.gz \
      docker/assets/lua-nginx-module-0.10.28.tar.gz \
      docker/assets/lua-resty-core-0.1.31.tar.gz \
      docker/assets/lua-resty-lrucache-0.13.tar.gz \
+     docker/assets/luajit2-2.1-20231117.tar.gz \
      /tmp/
+
+# Extract and install LuaJIT
+RUN tar xzf luajit2-2.1-20231117.tar.gz && \
+    cd luajit2-2.1-20231117 && \
+    make && make install PREFIX=/usr/local
 
 # Extract all archives
 RUN tar -zxf nginx-1.27.4.tar.gz && \
     tar -zxf nginx-vod-module-1.33.tar.gz && \
-    tar -zxf luajit-2.0-538a821.tar.gz && \
     tar -zxf lua-nginx-module-0.10.28.tar.gz && \
     tar -zxf lua-resty-core-0.1.31.tar.gz && \
     tar -zxf lua-resty-lrucache-0.13.tar.gz && \
     mv lua-nginx-module-0.10.28 lua-nginx-module && \
     mv lua-resty-core-0.1.31 lua-resty-core && \
     mv lua-resty-lrucache-0.13 lua-resty-lrucache
-# Build LuaJIT
-WORKDIR /tmp/luajit-2.0-538a821
-RUN make && make install  LUA_LIB_DIR=/usr/local/share/lua/5.1&& \
-    ln -sf /usr/local/lib/libluajit-5.1.so.2 /usr/lib/x86_64-linux-gnu/ && \
-    ldconfig
 
 # Create OpenResty directory structure with proper permissions
 RUN mkdir -p /usr/local/openresty/luajit/share/lua/5.1/resty \
