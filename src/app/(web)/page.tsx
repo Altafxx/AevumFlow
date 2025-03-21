@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Video, Folder } from "@prisma/client";
 import { Upload, PlayCircle, Clock, FolderIcon } from "lucide-react";
 
+export const revalidate = 300;
 export default async function Home() {
   const videos = await fetchVideos();
 
