@@ -14,7 +14,7 @@ export default function Footer() {
                         <span className="font-medium">AevumFlow</span>
                     </div>
                     <Link
-                        href="https://github.com/Altafxx/nginx-vod-microservice"
+                        href="https://github.com/Altafxx/aevumflow"
                         target="_blank"
                         className="text-muted-foreground hover:text-primary transition-colors"
                     >
