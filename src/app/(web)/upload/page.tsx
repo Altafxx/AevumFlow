@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 // import { FormDescription, } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea";
-import { LoaderPinwheel, Plus, Upload as UploadIcon, FileVideo, Folder as FolderIcon } from "lucide-react";
+import { LoaderPinwheel, Plus, Upload as UploadIcon, FileVideo, Folder as FolderIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -30,6 +30,7 @@ export default function Upload() {
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [selectedFolder, setSelectedFolder] = useState<string>(""); // Add this state
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const router = useRouter();
 
     const formSchema = z.object({
@@ -66,6 +67,17 @@ export default function Upload() {
     })
 
     const videoRef = form.register("video");
+
+    const clearSelectedFile = () => {
+        setSelectedFile(null);
+        // Reset the file input
+        const fileInput = document.getElementById("video") as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = "";
+        }
+        // Reset the form field
+        form.setValue("video", null as unknown as FileList);
+    };
 
     useEffect(() => {
         const getFolders = async () => {
@@ -118,7 +130,7 @@ export default function Upload() {
                 }
             );
 
-            form.reset();
+            form.resetField("video");
 
             setIsUploading(false);
         } catch (error) {
@@ -157,21 +169,51 @@ export default function Upload() {
                                     <FormItem>
                                         <FormLabel>Video File</FormLabel>
                                         <FormControl>
-                                            <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                                            <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors relative">
+                                                {selectedFile && (
+                                                    <Button
+                                                        type="button"
+                                                        variant={"ghost"}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            clearSelectedFile();
+                                                        }}
+                                                        className="absolute right-2 top-2 p-1.5 rounded-full aspect-square"
+                                                    >
+                                                        <X size={14} />
+                                                    </Button>
+                                                )}
                                                 <Input
                                                     id="video"
                                                     type="file"
                                                     {...videoRef}
                                                     className="hidden"
+                                                    onChange={(e) => {
+                                                        videoRef.onChange(e);
+                                                        setSelectedFile(e.target.files?.[0] || null);
+                                                    }}
                                                 />
                                                 <label htmlFor="video" className="cursor-pointer space-y-2 flex flex-col items-center">
                                                     <FileVideo size={32} className="text-muted-foreground" />
-                                                    <div className="text-sm font-medium">
-                                                        Drag and drop or click to upload
-                                                    </div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        MP4, MOV, or WebM (Max 10GB)
-                                                    </div>
+                                                    {selectedFile ? (
+                                                        <div className="space-y-1">
+                                                            <div className="text-sm font-medium">
+                                                                {selectedFile.name}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-sm font-medium">
+                                                                Drag and drop or click to upload
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                MP4, MOV, or WebM (Max 10GB)
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </label>
                                             </div>
                                         </FormControl>
