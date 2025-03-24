@@ -1,4 +1,4 @@
-# NGINX Kaltura VOD Microservice (Not so micro I guess)
+# AevumFlow (formerly Nginx VOD Microservice)
 
 A dockerized NGINX server configured with Kaltura VOD module for serving video content. This server handles VOD content streaming, JSON manifest delivery, and file upload capabilities.
 
@@ -33,8 +33,8 @@ The directories serve the following purposes:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Altafxx/nginx-vod-microservice.git
-cd nginx-kaltura-vod
+git clone https://github.com/Altafxx/aevumflow.git
+cd aevumflow
 ```
 
 2. Create required directories:

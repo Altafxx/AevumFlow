@@ -16,7 +16,7 @@ services:
         - 3000:80
       restart: unless-stopped
       networks:
-        - kaltura
+        - aevumflow
   
     app:
       build: 
@@ -33,7 +33,7 @@ services:
         - ./src:/app/src
         - ./prisma/data.db:/app/prisma/data.db
       networks:
-        - kaltura
+        - aevumflow
       depends_on:
         - minio
 
@@ -55,8 +55,8 @@ services:
         timeout: 20s
         retries: 3
       networks:
-        - kaltura
+        - aevumflow
   
 networks:
-  kaltura:
+  aevumflow:
     driver: bridge

@@ -12,7 +12,7 @@ export default function Navbar() {
                     <div className="flex items-center">
                         <Link href="/" className="text-xl font-bold inline-flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-primary rounded-full translate-y-[1px]" />
-                            VOD Engine
+                            AevumFlow
                         </Link>
                     </div>
 

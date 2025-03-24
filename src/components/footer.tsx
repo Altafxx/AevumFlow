@@ -11,7 +11,7 @@ export default function Footer() {
                     </p>
                     <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-primary rounded-full translate-y-[1px]" />
-                        <span className="font-medium">VOD Engine</span>
+                        <span className="font-medium">AevumFlow</span>
                     </div>
                     <Link
                         href="https://github.com/Altafxx/nginx-vod-microservice"
