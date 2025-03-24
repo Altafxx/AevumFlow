@@ -14,9 +14,9 @@ export default async function Home() {
     <main className="flex flex-col min-h-screen py-24 space-y-16">
       <div className="text-center space-y-6 relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-        <h1 className="text-5xl font-bold inline-flex items-center justify-center gap-3">
-          <span className="w-2 h-2 bg-primary rounded-full translate-y-[2px]" />
-          VOD Engine
+        <h1 className="relative text-5xl font-bold inline-flex items-center justify-center gap-3">
+          {/* <span className="absolute -left-4 w-2 h-2 bg-primary rounded-full translate-y-[2px]" /> */}
+          AevumFlow
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
           A modern video hosting platform built with Next.js and NGINX. Upload, stream, and share your videos with ease.

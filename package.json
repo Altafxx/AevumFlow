@@ -1,6 +1,6 @@
 {
-  "name": "nginx-kaltura-vod",
-  "version": "2.1.1",
+  "name": "aevumflow",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VOD Engine",
+  title: "AevumFlow",
   description: "A simple VOD engine",
 };
 
