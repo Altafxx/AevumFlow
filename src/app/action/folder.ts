@@ -1,6 +1,8 @@
 "use server"
 import { db } from "@/lib/db-client";
 import { revalidatePath } from "next/cache";
+import { mkdir } from "fs/promises";
+import { join } from "path";
 
 export async function fetchFolders() {
     const folder = await db.folder.findMany({
@@ -26,6 +28,22 @@ export async function createFolder(name: string) {
 
     if (checkFolder.length > 0) {
         return Error('Folder already exists');
+    }
+
+    // Create the physical folder structure
+    const folderPath = path.replace(/^\//, ''); // Remove leading slash
+    const vodFolderPath = join(process.cwd(), "data/vod", folderPath);
+    const jsonFolderPath = join(process.cwd(), "data/json", folderPath);
+
+    try {
+        // Create both folders concurrently
+        await Promise.all([
+            mkdir(vodFolderPath, { recursive: true }),
+            mkdir(jsonFolderPath, { recursive: true })
+        ]);
+    } catch (error) {
+        console.error('Failed to create folder structure:', error);
+        return Error('Failed to create folder structure');
     }
 
     const folder = await db.folder.create({

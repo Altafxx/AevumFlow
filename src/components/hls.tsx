@@ -42,7 +42,7 @@ export default function VideoPlayer({ src }: { src: string }) {
                 'This is an old browser that does not support MSE https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API'
             );
         }
-    }, [src, videoRef]);
+    }, [src, videoRef, localhost]);
 
     return (
         <div id="player" className='rounded-md overflow-clip'>
