@@ -54,7 +54,20 @@ const processVideo = async (inputPath: string, outputPath: string, resolution: R
     return new Promise((resolve, reject) => {
         Ffmpeg(inputPath)
             .size(`${resolution.width}x${resolution.height}`)
-            .videoBitrate('1024k')
+            // Add keyframe settings
+            .addOption('-g', '48') // Keyframe every 48 frames
+            .addOption('-keyint_min', '48')
+            // Add better encoding settings
+            .addOption('-preset', 'fast') // Balance between speed and quality
+            .addOption('-profile:v', 'high')
+            .addOption('-level', '4.1')
+            // Add better bitrate control
+            .videoBitrate(getBitrateForResolution(resolution.height), true) // true enables CBR
+            .addOption('-maxrate', `${getBitrateForResolution(resolution.height)}k`)
+            .addOption('-bufsize', `${getBitrateForResolution(resolution.height) * 2}k`)
+            // Add better audio settings
+            .audioCodec('aac')
+            .audioBitrate('128k')
             .videoCodec('libx264')
             .format('mp4')
             .on('end', () => resolve())
@@ -182,3 +195,17 @@ parentPort?.on('message', async (data: {
         process.exit(0);
     }
 });
+
+// Add this helper function to calculate appropriate bitrates
+function getBitrateForResolution(height: number): number {
+    const bitrates = {
+        2160: 45000, // 4K
+        1440: 16000, // 2K
+        1080: 8000,  // Full HD
+        720: 5000,   // HD
+        480: 2500,   // SD
+        360: 1000    // Low
+    };
+
+    return bitrates[height as keyof typeof bitrates] || 1000; // Default to 1000k if height not found
+}
