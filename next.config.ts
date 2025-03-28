@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: allowedRemotePattern() as RemotePattern[],
   },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+    return config;
+  },
+  env: {
+    LOCALHOST: process.env.LOCALHOST || 'false',
+  },
 };
 
 export default nextConfig;
