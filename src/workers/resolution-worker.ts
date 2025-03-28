@@ -184,13 +184,49 @@ parentPort?.on('message', async (data: {
             ...resolutionsToProcess
         ]);
 
+        // After all processing is done, update isProcessing to false
+        await db.video.update({
+            where: { id: data.videoId },
+            data: { isProcessing: false }
+        });
+
         await rm(data.videopath);
+
+        try {
+            // Revalidate pages
+            await fetch("http://localhost:3000/api/revalidate?path=/");
+            await fetch("http://localhost:3000/api/revalidate?path=/" + data.videoId);
+        } catch (error) {
+            console.error('Failed to revalidate:', error);
+        }
 
         parentPort?.postMessage({ success: true });
     } catch (error) {
         console.error('Failed to process video resolutions:', error);
+
+        // Update isProcessing to false even if there's an error
+        try {
+            await db.video.update({
+                where: { id: data.videoId },
+                data: { isProcessing: false }
+            });
+        } catch (updateError) {
+            console.error('Failed to update processing status:', updateError);
+        }
+
         parentPort?.postMessage({ success: false, error });
     } finally {
+        try {
+            await db.video.update({
+                where: { id: data.videoId },
+                data: {
+                    isProcessing: false,
+                    isReady: true
+                }
+            });
+        } catch (error) {
+            console.error('Failed to update video status:', error);
+        }
         await db.$disconnect();
         process.exit(0);
     }
