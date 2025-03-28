@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     serverActions: {
-      bodySizeLimit: "10GB",
+      bodySizeLimit: "100mb",
       allowedOrigins: allowedOrigins() as string[],
     },
   },

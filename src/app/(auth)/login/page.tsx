@@ -70,7 +70,7 @@ function LoginForm() {
                 </Button>
             </form>
 
-            <div className="relative">
+            {/* <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300" />
                 </div>
@@ -85,7 +85,7 @@ function LoginForm() {
                 onClick={() => signIn('github', { callbackUrl: from })}
             >
                 Sign in with GitHub
-            </Button>
+            </Button> */}
 
             <p className="text-center text-sm text-gray-600">
                 Don&apos;t have an account?{" "}

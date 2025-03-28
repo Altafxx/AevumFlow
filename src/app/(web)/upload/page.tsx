@@ -55,7 +55,9 @@ export default function Upload() {
             .refine((files) => files[0]?.type.startsWith("video/"), {
                 message: "Please upload a valid video file.",
             })
-
+            .refine((files) => files[0]?.size <= 100 * 1024 * 1024, {
+                message: "Video size must be less than 100MB.",
+            })
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -210,7 +212,7 @@ export default function Upload() {
                                                                 Drag and drop or click to upload
                                                             </div>
                                                             <div className="text-xs text-muted-foreground">
-                                                                MP4, MOV, or WebM (Max 10GB)
+                                                                MP4, MOV, or WebM (Max 100MB)  {/* Changed from 10GB */}
                                                             </div>
                                                         </>
                                                     )}
