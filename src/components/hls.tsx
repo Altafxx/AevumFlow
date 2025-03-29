@@ -133,12 +133,28 @@ export default function VideoPlayer({ src, availableResolutions = [] }: {
                 }
             });
 
+            // Create custom control for current resolution
+            const currentResolutionControl = document.createElement('span');
+            currentResolutionControl.className = 'plyr__controls__item plyr__control--resolution';
+            currentResolutionControl.style.minWidth = '60px';
+            currentResolutionControl.style.padding = '0 10px';
+            currentResolutionControl.textContent = 'Auto';
+
+            // Update resolution text when quality changes
+            hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+                const currentLevel = hls.levels[data.level];
+                if (currentResolutionControl) {
+                    currentResolutionControl.textContent = currentLevel ? `${currentLevel.height}p` : 'Auto';
+                }
+            });
+
             const player = new Plyr(video, {
                 controls: [
                     'play-large',
                     'play',
                     'progress',
                     'current-time',
+                    'duration',
                     'mute',
                     'volume',
                     'settings',
@@ -157,6 +173,40 @@ export default function VideoPlayer({ src, availableResolutions = [] }: {
                         }
                     }
                 }
+            });
+
+            // Add custom styles to document
+            const style = document.createElement('style');
+            style.textContent = `
+                .plyr__control--resolution {
+                    display: inline-flex !important;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 10px;
+                    font-size: 13px;
+                    color: rgba(255, 255, 255, 0.8);
+                    font-weight: 400;
+                    border-left: 1px solid rgba(255, 255, 255, 0.2);
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Wait for player to be ready before adding the custom control
+            player.on('ready', () => {
+                const controlBar = video.closest('.plyr')?.querySelector('.plyr__controls');
+                if (controlBar) {
+                    const durationContainer = controlBar.querySelector('.plyr__time--duration');
+                    const muteButton = controlBar.querySelector('.plyr__control[data-plyr="mute"]');
+
+                    if (durationContainer && muteButton) {
+                        // Insert after duration and before mute
+                        muteButton.parentNode?.insertBefore(currentResolutionControl, muteButton);
+                    }
+                }
+
+                // Set initial resolution
+                const currentLevel = hls.currentLevel >= 0 ? hls.levels[hls.currentLevel] : null;
+                currentResolutionControl.textContent = currentLevel ? `${currentLevel.height}p` : 'Auto';
             });
         } else {
             console.error('This browser does not support MSE');
