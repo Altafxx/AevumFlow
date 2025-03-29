@@ -7,6 +7,12 @@ services:
           - ${TARGETPLATFORM:-linux/${HOSTARCH:-amd64}}
       environment:
         - LOCALHOST=${LOCALHOST:-false}
+      deploy:
+        resources:
+          limits:
+            memory: 6G
+          reservations:
+            memory: 2G
       volumes:
         - ./data/json:/etc/nginx/json
         - ./data/vod:/etc/nginx/vod
