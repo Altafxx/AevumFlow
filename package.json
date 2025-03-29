@@ -1,6 +1,6 @@
 {
   "name": "aevumflow",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "private": true,
   "scripts": {
     "dev": "ts-node scripts/generate-auth-secret.ts && next dev --turbopack",
