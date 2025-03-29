@@ -179,6 +179,11 @@ RUN apt-get update && \
     curl && \
     rm -rf /var/lib/apt/lists/*
 
+# Increase system limits
+RUN echo "* soft nofile 65535" >> /etc/security/limits.conf && \
+    echo "* hard nofile 65535" >> /etc/security/limits.conf && \
+    echo "session required pam_limits.so" >> /etc/pam.d/common-session
+
 # Create required directories and set permissions
 RUN mkdir -p /var/log/nginx && \
     mkdir -p /var/cache/nginx && \
