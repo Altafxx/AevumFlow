@@ -5,43 +5,36 @@ import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 
 const defaultHlsConfig = {
-    // Increase buffer sizes significantly for 4K content
-    maxBufferLength: 120,              // Doubled from 60
-    maxMaxBufferLength: 1200,          // Doubled from 600
-    maxBufferSize: 4000 * 1000 * 1000, // Increased to 4GB for 4K content
-    maxBufferHole: 2,                  // Increased for larger segments
-
-    // Adjust loading parameters
-    manifestLoadingTimeOut: 30000,     // Increased timeout for manifest
-    manifestLoadingMaxRetry: 6,        // More retries
-    manifestLoadingRetryDelay: 1000,
-    levelLoadingTimeOut: 30000,        // Increased timeout for levels
-    levelLoadingMaxRetry: 6,
-    levelLoadingRetryDelay: 1000,
-    fragLoadingTimeOut: 180000,        // Increased for large segments (3 minutes)
-    fragLoadingMaxRetry: 8,
-    fragLoadingRetryDelay: 1000,
-    fragLoadingMaxRetryTimeout: 120000,
-
-    // Performance optimizations
+    // Core settings
     enableWorker: true,
-    startLevel: -1,                    // Auto
-    abrEwmaDefaultEstimate: 10000000,  // Increased bandwidth estimate (10mbps)
+    lowLatencyMode: false,
+
+    // Buffer settings - optimized for high-res
+    maxBufferSize: 512 * 1000 * 1000,    // 512MB - reduced to prevent browser memory issues
+    maxBufferLength: 60,                  // 60 seconds
+    maxMaxBufferLength: 120,              // Maximum buffer size in seconds
+
+    // Loading settings
+    manifestLoadingMaxRetry: 6,
+    manifestLoadingRetryDelay: 1000,
+    manifestLoadingTimeOut: 20000,
+
+    // Fragment loading
+    fragLoadingMaxRetry: 6,
+    fragLoadingRetryDelay: 1000,
+    fragLoadingTimeOut: 20000,
+
+    // ABR (Adaptive Bitrate) settings
+    startLevel: -1,                       // Auto
+    abrEwmaDefaultEstimate: 5000000,      // 5mbps starting bandwidth estimate
     abrBandWidthFactor: 0.95,
     abrBandWidthUpFactor: 0.7,
     abrMaxWithRealBitrate: true,
-    maxFragLookUpTolerance: 1.0,
 
-    // Additional tweaks for high-quality content
+    // Performance settings
     testBandwidth: true,
-    progressive: true,
-    lowLatencyMode: false,
-    backBufferLength: 180,             // Increased for smoother playback
-
-    // Chunk processing
-    maxLoadingDelay: 8,
-    startFragPrefetch: true,
-    highBufferWatchdogPeriod: 8,
+    progressive: false,                   // Disable progressive download
+    backBufferLength: 30,                 // Reduce back buffer to save memory
 };
 
 export default function VideoPlayer({ src, availableResolutions = [] }: {
@@ -59,23 +52,9 @@ export default function VideoPlayer({ src, availableResolutions = [] }: {
         const https = localhost === 'true' ? 'http://' : 'https://';
         const secureUrl = src.replace('http://', https);
 
-        // Add configuration for high-resolution content
-        const customConfig = {
-            ...defaultHlsConfig,
-            // Increase initial bandwidth estimate for faster high-quality playback
-            abrEwmaDefaultEstimate: 50000000, // 50mbps initial estimate
-            // Increase fragment load timeout for larger segments
-            fragLoadingTimeOut: 300000, // 5 minutes
-            // Enable more aggressive buffering
-            maxBufferSize: 8000 * 1000 * 1000, // 8GB buffer size
-            maxBufferLength: 240, // 4 minutes
-            // Improve stability for high-bitrate content
-            liveSyncDurationCount: 7,
-            liveMaxLatencyDurationCount: 10,
-            // Enable better segment handling
-            stretchShortVideoTrack: true,
-            maxFragLookUpTolerance: 0.5
-        };
+        // Add debug logging
+        console.log('Video source:', secureUrl);
+        console.log('Available resolutions:', availableResolutions);
 
         video.controls = true;
 
@@ -102,13 +81,34 @@ export default function VideoPlayer({ src, availableResolutions = [] }: {
             });
         } else if (Hls.isSupported()) {
             const hls = new Hls({
-                ...customConfig,
+                ...defaultHlsConfig,
                 xhrSetup: (xhr, url) => {
                     const finalUrl = localhost === 'true' ? url : url.replace('http://', https);
                     xhr.open('GET', finalUrl);
-                }
+                },
+                // Level capping and quality settings
+                capLevelToPlayerSize: true,
+                startLevel: -1,  // Auto
+                // Adaptive bitrate settings
+                abrEwmaDefaultEstimate: 5000000, // 5mbps starting bandwidth estimate
+                abrBandWidthFactor: 0.95,
+                abrBandWidthUpFactor: 0.7,
+                abrMaxWithRealBitrate: true
             });
-            hlsRef.current = hls;  // Store HLS instance
+            hlsRef.current = hls;
+
+            // Add level switching logic
+            hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+                console.log('Quality Level switched to:', data.level);
+            });
+
+            // Add manual quality selection
+            hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+                console.log('Available qualities:', data.levels.map(level => level.height));
+                // Start with a lower quality and let it adapt
+                const initialLevel = Math.min(2, data.levels.length - 1);
+                hls.nextLevel = initialLevel; // Use nextLevel instead of currentLevel for smoother switching
+            });
 
             hls.loadSource(secureUrl);
             hls.attachMedia(video);
@@ -176,6 +176,10 @@ export default function VideoPlayer({ src, availableResolutions = [] }: {
                 playsInline
                 preload="auto"
                 crossOrigin="anonymous"
+                style={{
+                    transform: 'translateZ(0)',  // Force hardware acceleration
+                    willChange: 'transform'      // Hint for browser optimization
+                }}
             />
         </div>
     );
