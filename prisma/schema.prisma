@@ -20,16 +20,18 @@ model VideoVersion {
 }
 
 model Video {
-  id          Int            @id @default(autoincrement())
-  title       String
-  filename    String
-  path        String
-  thumbnail   String?
-  description String?
-  folderID    Int?
-  createdAt   DateTime       @default(now())
-  folder      Folder?        @relation(fields: [folderID], references: [id])
-  versions    VideoVersion[]
+  id           Int            @id @default(autoincrement())
+  title        String
+  filename     String
+  path         String
+  thumbnail    String?
+  description  String?
+  folderID     Int?
+  isProcessing Boolean        @default(true)
+  isReady      Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  folder       Folder?        @relation(fields: [folderID], references: [id])
+  versions     VideoVersion[]
 }
 
 model Folder {

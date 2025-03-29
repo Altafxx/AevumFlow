@@ -4,7 +4,7 @@ import { join } from 'path';
 import { PrismaClient } from '@prisma/client';
 import { Client } from 'minio';
 import defaultConfig from '../lib/default-config';
-import { copyFile, writeFile, rm } from 'fs/promises';
+import { copyFile, writeFile, rm, mkdir } from 'fs/promises';
 
 const db = new PrismaClient();
 
@@ -101,7 +101,7 @@ const updateJsonManifest = async (fileName: string, folderPath: string, resoluti
         sequences: resolutions.map(resolution => ({
             clips: [{
                 type: 'source',
-                path: `/etc/nginx/vod/${folderPath ? folderPath + '/' : ''}${fileName}_${resolution.name}${ext}`
+                path: `/etc/nginx/vod/${folderPath ? folderPath + '/' : ''}${fileName}/${resolution.name}${ext}`
             }]
         }))
     };
@@ -135,12 +135,14 @@ parentPort?.on('message', async (data: {
         // Create paths with folder structure
         const vodFolderPath = join(process.cwd(), "data/vod", data.folderPath);
 
-        // Rename the original file with its resolution
-        const originalFileName = `${data.fileName}_${originalResolutionName}.mp4`;
-        const originalPath = join(vodFolderPath, originalFileName);
+        await mkdir(join(vodFolderPath, data.fileName), { recursive: true });
 
-        const rawFileName = `${data.fileName}_raw.mp4`;
-        const rawPath = join(vodFolderPath, rawFileName);
+        // Rename the original file with its resolution
+        const originalFileName = `${originalResolutionName}.mp4`;
+        const originalPath = join(vodFolderPath, data.fileName, originalFileName);
+
+        const rawFileName = `raw.mp4`;
+        const rawPath = join(vodFolderPath, data.fileName, rawFileName);
 
         await copyFile(data.videopath, originalPath);
         await copyFile(data.videopath, rawPath);
@@ -150,8 +152,8 @@ parentPort?.on('message', async (data: {
 
         // Process each lower resolution
         for (const resolution of resolutionsToProcess) {
-            const outputFileName = `${data.fileName}_${resolution.name}.mp4`;
-            const outputPath = join(vodFolderPath, outputFileName);
+            const outputFileName = `${resolution.name}.mp4`;
+            const outputPath = join(vodFolderPath, data.fileName, outputFileName);
 
             await processVideo(originalPath, outputPath, resolution);
 
@@ -160,7 +162,7 @@ parentPort?.on('message', async (data: {
                 data: {
                     videoId: data.videoId,
                     resolution: resolution.name,
-                    path: `/video/${data.folderPath ? data.folderPath + '/' : ''}${data.fileName}.json/master.m3u8`
+                    path: `/${data.folderPath ? data.folderPath + '/' : ''}${data.fileName}/${resolution.name}.mp4`
                 }
             });
         }
@@ -170,7 +172,7 @@ parentPort?.on('message', async (data: {
             data: {
                 videoId: data.videoId,
                 resolution: originalResolutionName,
-                path: `/video/${data.folderPath ? data.folderPath + '/' : ''}${data.fileName}.json/master.m3u8`
+                path: `/${data.folderPath ? data.folderPath + '/' : ''}${data.fileName}/raw.mp4`
             }
         });
 
@@ -184,13 +186,49 @@ parentPort?.on('message', async (data: {
             ...resolutionsToProcess
         ]);
 
+        // After all processing is done, update isProcessing to false
+        await db.video.update({
+            where: { id: data.videoId },
+            data: { isProcessing: false }
+        });
+
         await rm(data.videopath);
+
+        try {
+            // Revalidate pages
+            await fetch("http://localhost:3000/api/revalidate?path=/");
+            await fetch("http://localhost:3000/api/revalidate?path=/" + data.videoId);
+        } catch (error) {
+            console.error('Failed to revalidate:', error);
+        }
 
         parentPort?.postMessage({ success: true });
     } catch (error) {
         console.error('Failed to process video resolutions:', error);
+
+        // Update isProcessing to false even if there's an error
+        try {
+            await db.video.update({
+                where: { id: data.videoId },
+                data: { isProcessing: false }
+            });
+        } catch (updateError) {
+            console.error('Failed to update processing status:', updateError);
+        }
+
         parentPort?.postMessage({ success: false, error });
     } finally {
+        try {
+            await db.video.update({
+                where: { id: data.videoId },
+                data: {
+                    isProcessing: false,
+                    isReady: true
+                }
+            });
+        } catch (error) {
+            console.error('Failed to update video status:', error);
+        }
         await db.$disconnect();
         process.exit(0);
     }

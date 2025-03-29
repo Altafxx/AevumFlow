@@ -4,7 +4,7 @@ import { fetchVideos } from "../action/video";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { Video, Folder } from "@prisma/client";
-import { Upload, PlayCircle, Clock, FolderIcon } from "lucide-react";
+import { Upload, PlayCircle, Clock, FolderIcon, Loader2 } from "lucide-react";
 
 export const revalidate = 300;
 export default async function Home() {
@@ -51,13 +51,26 @@ export default async function Home() {
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <PlayCircle className="w-12 h-12 text-white" />
                   </div>
+                  {/* Add status indicators */}
+                  {video.isProcessing && (
+                    <div className="absolute right-2 top-2 flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground rounded-full px-3 py-1 text-xs">
+                      <Loader2 size={12} className="animate-spin" />
+                      Processing
+                    </div>
+                  )}
+                  {!video.isProcessing && video.isReady && (
+                    <div className="absolute right-2 top-2 bg-green-500/80 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                      Ready
+                    </div>
+                  )}
+                  {video?.folder?.name && (
+                    <div className="absolute left-2 top-2 flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground rounded-full px-3 py-1 text-xs">
+                      <FolderIcon size={12} />
+                      {video?.folder?.name}
+                    </div>
+                  )}
                 </div>
-                {video?.folder?.name && (
-                  <div className="absolute left-2 top-2 flex items-center gap-1 bg-background/80 backdrop-blur-sm text-foreground rounded-full px-3 py-1 text-xs">
-                    <FolderIcon size={12} />
-                    {video?.folder?.name}
-                  </div>
-                )}
               </CardHeader>
               <CardContent className="p-4">
                 <CardTitle className="line-clamp-1 text-lg">{video?.title}</CardTitle>

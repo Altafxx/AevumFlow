@@ -1,12 +1,19 @@
 import { fetchVideoByID } from "@/app/action/video";
-import VideoPlayer from "@/components/hls";
+import VideoWrapper from "@/components/video-wrapper";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 // import { CardFooter } from "@/components/ui/card";
 import { notFound } from "next/navigation";
-import { Clock, FolderIcon, } from "lucide-react";
+import { Clock, FolderIcon, Loader2 } from "lucide-react";
 // import { Share2, Heart, MessageSquare } from "lucide-react";
 // import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
+
+const getResolutionHeight = (resolution: string): number => {
+    if (resolution.toLowerCase() === '4k') return 2160;
+    if (resolution.toLowerCase() === '2k') return 1440;
+    return parseInt(resolution.toLowerCase().replace('p', ''));
+};
 
 export default async function VideoByID({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -14,30 +21,41 @@ export default async function VideoByID({ params }: { params: Promise<{ id: stri
 
     if (!video) notFound()
 
+    // Sort versions by resolution
+    const sortedVersions = [...(video.versions || [])].sort(
+        (a, b) => getResolutionHeight(a.resolution) - getResolutionHeight(b.resolution)
+    );
+
+    const availableResolutions = video.versions
+        .map(v => getResolutionHeight(v.resolution))
+        .sort((a, b) => b - a); // Sort in descending order
+
     return (
         <main className="flex flex-col min-h-screen py-24 px-4 space-y-8">
             <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-3 space-y-6">
                     {/* Video Player Section */}
                     <div className="rounded-xl overflow-hidden bg-card/50 backdrop-blur-sm border">
-                        {video?.path ? (
-                            <div className="relative group">
-                                <VideoPlayer src={video?.path} />
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                    <div className="flex items-center justify-between text-white">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                                            <span className="font-medium">Now Playing</span>
-                                        </div>
-                                        <h2 className="text-lg font-medium line-clamp-1">
-                                            {video?.title}
-                                        </h2>
-                                    </div>
-                                </div>
-                            </div>
+                        {video?.path && !video.isProcessing ? (
+                            <VideoWrapper src={video.path} title={video.title} availableResolutions={availableResolutions} />
                         ) : (
-                            <div className="aspect-video bg-card/50 backdrop-blur-sm flex items-center justify-center">
-                                <div className="text-muted-foreground">Video not available</div>
+                            <div className="aspect-video bg-card/50 backdrop-blur-sm relative">
+                                <Image
+                                    src={video.thumbnail ? `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}${video.thumbnail}.webp` : "/thumbnail.webp"}
+                                    alt={video?.title}
+                                    fill
+                                    className="object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    {video.isProcessing ? (
+                                        <div className="flex items-center gap-2 text-white">
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                            <span>Processing video...</span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-muted-foreground">Video not available</div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -83,6 +101,25 @@ export default async function VideoByID({ params }: { params: Promise<{ id: stri
                                     Comment
                                 </Button>
                             </div> */}
+                        </CardContent>
+                    </Card>
+
+                    {/* Available Resolutions Card */}
+                    <Card className="bg-card/50 backdrop-blur-sm border">
+                        <CardHeader>
+                            <h2 className="text-xl font-semibold">Available Resolutions</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                                {sortedVersions.map((version) => (
+                                    <div
+                                        key={version.id}
+                                        className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
+                                    >
+                                        {version.resolution}
+                                    </div>
+                                ))}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
